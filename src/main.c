@@ -58,14 +58,14 @@ void upd_phosphor(SDL_Renderer* renderer, SDL_Texture* phosphor, float fade) {
     // target not reset so render_osci can draw on the same texture
 }
 
-void fadeToBlack(SDL_Renderer *renderer, Uint8 alpha) {
+void fadeToBlack(SDL_Renderer *renderer, SDL_Texture* target, Uint8 alpha) {
+    SDL_SetRenderTarget(renderer, target);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, alpha);
-    SDL_Rect rect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}; // Adjust to your window size
-    SDL_RenderFillRect(renderer, &rect);
+    SDL_RenderFillRect(renderer, NULL);
 }
 
-void render_osci(SDL_Renderer* renderer, Uint8* buf,SDL_Texture* phosphor/*, float fade*/) {
+void render_osci(SDL_Renderer* renderer, Uint8* buf, SDL_Texture* phosphor/*, float fade*/) {
     Sint32* samples = (Sint32*)buf;
 
     if (auPos - auPosOld < 1) {
@@ -145,7 +145,12 @@ int win(char* audio) {
         }
         // stuff goes here
         //upd_phosphor(renderer, phosphor, FADE_RATE);
-        fadeToBlack(renderer, 1);
+        static Uint32 lastFadeTime = 0;
+        Uint32 currentTime = SDL_GetTicks();
+        if (currentTime - lastFadeTime >= (1000 / TARG_FPS)) {
+            fadeToBlack(renderer, phosphor, 10);
+            lastFadeTime = currentTime;
+        }
         render_osci(renderer, wavBuf, phosphor/*, FADE_RATE*/);
 
         SDL_SetRenderTarget(renderer, NULL);

@@ -20,3 +20,7 @@ made this in about a day
 ## problems
 
 - color doesnt fade completely to black which is infuriating
+
+## credits
+
+credit to Remo Dentato for the VRG library used for CLI args
