@@ -3,5 +3,12 @@ cmake_minimum_required(VERSION 3.10)
 project(osci)
 
 set(CMAKE_C_STANDARD 99)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-add_executable(${PROJECT_NAME} main.c)
+find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
+
+add_executable(osci src/main.c)
+
+target_link_libraries(osci PRIVATE SDL2::SDL2)

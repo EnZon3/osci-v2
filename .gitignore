@@ -5,3 +5,11 @@ dist/
 CMakeCache.txt
 cmake_install.cmake
 CMakeFiles/
+bin/
+
+# audio files
+03 - Blocks.flac
+blocks.wav
+05 - Spirals.flac
+spirals.wav
+# blocks_ytdl is preserved because it is not in original quality
