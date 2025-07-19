@@ -85,7 +85,7 @@ void render_osci(SDL_Renderer* renderer, Uint8* buf, SDL_Texture* phosphor/*, fl
         // if (l == NULL) l = 0;
         // if (r == NULL) r = 0;
 
-        int x = normalize(l, OSC_AMPLITUDE, (int)SCREEN_WIDTH/2);
+        int x = normalize(-l, OSC_AMPLITUDE, (int)SCREEN_WIDTH/2);
         int y = normalize(r, OSC_AMPLITUDE, (int)SCREEN_HEIGHT/2);
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
@@ -174,7 +174,7 @@ int win(char* audio) {
 }
 
 int main(int argc, char* argv[]) {
-    vrgcli("osci2 v0.5 - (c) 2025 EnZon3") {
+    vrgcli("osci2 v0.5.1 - (c) 2025 EnZon3") {
         vrgarg("-h --help\tShow this help") {
             vrgusage();
         }
