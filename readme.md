@@ -12,10 +12,11 @@ made this in about a day
 
 - [x] make it actually work
 - [ ] refactor stuff so it doesn't look like a mess
-- [x] make it customizable (i'll mark this half off because it is customizable but not in a good way)
+- [x] make it customizable
 - [x] figure out conditions for audio end
 - [ ] support different bit depths (currently only 32-bit enc supported)
 - [ ] optimize the shit out of this
+- [ ] add support for reading from devices
 
 ## problems
 

@@ -9,9 +9,9 @@ const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
 
 #define S32_MAX 2147483647.0f
-#define OSC_AMPLITUDE 390
-#define TARG_FPS 360
-#define FADE_RATE 0.99f
+int OSC_AMPLITUDE = 390;
+int TARG_FPS = 360;
+float FADE_RATE = 0.99f;
 
 typedef struct {
     Uint8* pos;
@@ -174,9 +174,45 @@ int win(char* audio) {
 }
 
 int main(int argc, char* argv[]) {
-    vrgcli("osci2 v0.5.1 - (c) 2025 EnZon3") {
+    vrgcli("osci2 v0.6 - (c) 2025 EnZon3") {
         vrgarg("-h --help\tShow this help") {
             vrgusage();
+        }
+        vrgarg("-a --amplitude <number>\tset scaling value for the waveform (default: 390)") {
+            if (vrgarg == NULL) {
+                fprintf(stderr, "enter something\n");
+                exit(EXIT_FAILURE);
+            }
+            int amplitude = atoi(vrgarg);
+            if (amplitude <= 0) {
+                fprintf(stderr, "invalid amplitude: %s\n", vrgarg);
+                exit(EXIT_FAILURE);
+            }
+            OSC_AMPLITUDE = amplitude;
+        }
+        vrgarg("-f --fps <number>\tset phosphor FPS (default: 360)") {
+            if (vrgarg == NULL) {
+                fprintf(stderr, "enter something\n");
+                exit(EXIT_FAILURE);
+            }
+            int fps = atoi(vrgarg);
+            if (fps <= 0) {
+                fprintf(stderr, "Invalid FPS value: %s\n", vrgarg);
+                exit(EXIT_FAILURE);
+            }
+            TARG_FPS = fps;
+        }
+        vrgarg("-r --fade-rate <number>\tset phosphor fade rate (default: 0.99)") {
+            if (vrgarg == NULL) {
+                fprintf(stderr, "enter something\n");
+                exit(EXIT_FAILURE);
+            }
+            float fadeRate = atof(vrgarg);
+            if (fadeRate <= 0) {
+                fprintf(stderr, "invalid fade rate: %s\n", vrgarg);
+                exit(EXIT_FAILURE);
+            }
+            FADE_RATE = fadeRate;
         }
         vrgarg("-w --wav <file>\tLoad WAV") {
             printf("loading %s\n", vrgarg);
