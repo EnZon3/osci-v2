@@ -7,6 +7,7 @@
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
+const Uint32 OSCI_COLOR = 0x00FF00FF; // green
 
 #define S32_MAX 2147483647.0f
 int OSC_AMPLITUDE = 390;
@@ -21,6 +22,7 @@ typedef struct {
 uint32_t auPos = 0;
 uint32_t auPosOld = 0;
 Uint32 wavLength;
+Uint32* pixels;
 
 //copy pasted from chatgpt because i dont know jack shit about audio
 void audio_callback(void* userdata, Uint8* stream, int len) {
@@ -59,10 +61,12 @@ void upd_phosphor(SDL_Renderer* renderer, SDL_Texture* phosphor, float fade) {
 }
 
 void fadeToBlack(SDL_Renderer *renderer, SDL_Texture* target, Uint8 alpha) {
-    SDL_SetRenderTarget(renderer, target);
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, alpha);
-    SDL_RenderFillRect(renderer, NULL);
+    for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
+        Uint8* c = (Uint8*)&pixels[i];
+        c[0] = (Uint8)(c[0] * (0.95)); // B
+        c[1] = (Uint8)(c[1] * (0.95)); // G
+        c[2] = (Uint8)(c[2] * (0.95)); // R
+    }
 }
 
 void render_osci(SDL_Renderer* renderer, Uint8* buf, SDL_Texture* phosphor/*, float fade*/) {
@@ -88,8 +92,9 @@ void render_osci(SDL_Renderer* renderer, Uint8* buf, SDL_Texture* phosphor/*, fl
         int x = normalize(-l, OSC_AMPLITUDE, (int)SCREEN_WIDTH/2);
         int y = normalize(r, OSC_AMPLITUDE, (int)SCREEN_HEIGHT/2);
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-        SDL_RenderDrawPoint(renderer, x, y);
+        if (x < 0 || x >= SCREEN_WIDTH || y < 0 || y >= SCREEN_HEIGHT) continue; // outa bounds
+
+        pixels[y * SCREEN_WIDTH + x] = OSCI_COLOR;
     }
 
     auPosOld = auPos;
@@ -131,7 +136,10 @@ int win(char* audio) {
 
     // main loop
 
-    SDL_Texture* phosphor = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
+    SDL_Texture* phosphor = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    pixels = malloc(sizeof(Uint32) * SCREEN_WIDTH * SCREEN_HEIGHT);
+    memset(pixels, 0x0, sizeof(Uint32) * SCREEN_WIDTH * SCREEN_HEIGHT); // start black
 
     bool quit = false;
     while (sound.length > 0 && quit == false) {
@@ -148,14 +156,14 @@ int win(char* audio) {
         static Uint32 lastFadeTime = 0;
         Uint32 currentTime = SDL_GetTicks();
         if (currentTime - lastFadeTime >= (1000 / TARG_FPS)) {
-            fadeToBlack(renderer, phosphor, 10);
+            fadeToBlack(renderer, phosphor, 232);
             lastFadeTime = currentTime;
+            render_osci(renderer, wavBuf, phosphor/*, FADE_RATE*/);
+            SDL_UpdateTexture(phosphor, NULL, pixels, SCREEN_WIDTH * sizeof(Uint32));
+            SDL_RenderCopy(renderer, phosphor, NULL, NULL);
+            SDL_RenderPresent(renderer);
         }
-        render_osci(renderer, wavBuf, phosphor/*, FADE_RATE*/);
-
-        SDL_SetRenderTarget(renderer, NULL);
-        SDL_RenderCopy(renderer, phosphor, NULL, NULL);
-        SDL_RenderPresent(renderer);
+        // render_osci(renderer, wavBuf, phosphor/*, FADE_RATE*/);
 
         //Uint32 delay = (1000 / TARG_FPS) - (SDL_GetTicks() - frameStart);
         //if (delay > 0) SDL_Delay(delay);
@@ -169,12 +177,13 @@ int win(char* audio) {
     SDL_DestroyTexture(phosphor);
     SDL_CloseAudio();
     SDL_FreeWAV(wavBuf);
+    free(pixels);
     SDL_Quit();
     return 0;
 }
 
 int main(int argc, char* argv[]) {
-    vrgcli("osci2 v0.6 - (c) 2025 EnZon3") {
+    vrgcli("osci2 v0.7 - (c) 2025 EnZon3") {
         vrgarg("-h --help\tShow this help") {
             vrgusage();
         }
