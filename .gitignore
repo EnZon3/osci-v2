@@ -6,6 +6,7 @@ CMakeCache.txt
 cmake_install.cmake
 CMakeFiles/
 bin/
+Makefile
 
 # audio files
 03 - Blocks.flac
